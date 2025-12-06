@@ -6,12 +6,14 @@ The testing view draws two of them which divide and modulus the system clock to 
 
 To use the helper class simply:
 
+```java
 this.painter = new SevenSegmentPainter(context);
 
 this.painter.setWidth(channelDigitWidth);
 this.painter.setHeight(channelDigitHeight);
 
 painter.drawDigit(canvas, (int) ((System.currentTimeMillis() / 10000) % 10));
+```
 
 https://github.com/user-attachments/assets/38af2013-19f5-477f-8f6e-a13fcd23bad5
 
