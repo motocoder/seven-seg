@@ -116,11 +116,11 @@ public class SevenSegmentPainter {
 
         canvas.save();
 
-        canvas.translate(-(getWidth() / 2.0f * digitCount + digitCount * getWidth() * 0.1f), 0);
+        canvas.translate(-(getWidth() / 2.0f * digitCount + ((digitCount-1) * getWidth() * 0.1f) /2f), -getHeight()/2f);
 
         for(int i = 0; i < digitCount; i++) {
             drawDigit(canvas, digitValues[i]);
-            canvas.translate(getWidth() + i * getWidth() * 0.1f, 0);
+            canvas.translate(getWidth() + ((1+i) * getWidth() * 0.1f), 0);
         }
 
         canvas.restore();
