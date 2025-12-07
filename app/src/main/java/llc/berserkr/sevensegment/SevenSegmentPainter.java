@@ -112,12 +112,36 @@ public class SevenSegmentPainter {
 
     }
 
+    public void drawDigits(Canvas canvas, int digitCount, int [] digitValues) {
+
+        canvas.save();
+
+        canvas.translate(-(getWidth() / 2.0f * digitCount + digitCount * getWidth() * 0.1f), 0);
+
+        for(int i = 0; i < digitCount; i++) {
+            drawDigit(canvas, digitValues[i]);
+            canvas.translate(getWidth() + i * getWidth() * 0.1f, 0);
+        }
+
+        canvas.restore();
+
+    }
+
+
     public void setWidth(float width) {
         this.width = width;
     }
 
     public void setHeight(float height) {
         this.height = height;
+    }
+
+    public float getWidth() {
+        return width;
+    }
+
+    public float getHeight() {
+        return height;
     }
 
     private enum SevenSeg {

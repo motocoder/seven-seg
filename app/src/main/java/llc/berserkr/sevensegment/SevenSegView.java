@@ -10,12 +10,19 @@ import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.util.Pair;
 import android.util.TypedValue;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.drawable.DrawableCompat;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
+import java.util.Set;
 
 public class SevenSegView extends SurfaceView implements SurfaceHolder.Callback, Runnable {
 
@@ -119,6 +126,16 @@ public class SevenSegView extends SurfaceView implements SurfaceHolder.Callback,
 
     }
 
+    private static int NUM_POINTS = 50;
+    private static int MAX_DIGITS = 5;
+
+    private final Set<Pair<Float, Float>> points = new HashSet<>();
+    private final IdentityHashMap<Pair<Float, Float>, Float> pointAngles = new IdentityHashMap<>();
+    private final IdentityHashMap<Pair<Float, Float>, Integer> pointCounts = new IdentityHashMap<>();
+
+    private final IdentityHashMap<Pair<Float, Float>, Float> pointWidths = new IdentityHashMap<>();
+    private final IdentityHashMap<Pair<Float, Float>, Float> pointHeights = new IdentityHashMap<>();
+
     private void takeMeasurements(int width, int height) {
 
         this.w = width;
@@ -132,7 +149,7 @@ public class SevenSegView extends SurfaceView implements SurfaceHolder.Callback,
         hundred60DP = dpToPx(160, getContext());
         eightyEightDP = dpToPx(88, getContext());
 
-        this.channelDigitWidth = w / 6F; //arbitrary size to draw them
+        this.channelDigitWidth = w / 30F; //arbitrary size to draw them
 
         this.channelDigitHeight = channelDigitWidth * hundred60DP / eightyEightDP; //math to calculate the digit height and maintain aspect ratio
 
@@ -141,12 +158,33 @@ public class SevenSegView extends SurfaceView implements SurfaceHolder.Callback,
         this.painter.setWidth(channelDigitWidth);
         this.painter.setHeight(channelDigitHeight);
 
+        for(int i = 0; i < NUM_POINTS; i++) {
+
+            final Pair<Float, Float> point = new Pair<>(
+                    (float) (Math.random() * w), //random value between 0 and w
+                    (float) (Math.random() * h) //random value between 0 and h
+            );
+
+            points.add(point);
+
+            pointAngles.put(point, (float) (Math.random() * 360F));
+            pointCounts.put(point, (int) (Math.random() * 6));
+
+            final float pointWidth = w / ((float) (Math.random() * 15F) + 10F);
+            final float pointHeight = pointWidth * hundred60DP / eightyEightDP;
+            pointWidths.put(point, pointWidth);
+            pointHeights.put(point, pointHeight);
+
+        }
+
     }
 
     @Override
     public void surfaceDestroyed(@NonNull SurfaceHolder holder) {
         running = false;
     }
+
+
 
     @Override
     public void run() {
@@ -162,16 +200,36 @@ public class SevenSegView extends SurfaceView implements SurfaceHolder.Callback,
                 // Clear the canvas (optional, but often necessary for full redraw)
                 canvas.drawColor(Color.BLACK); // Or any background color
 
-                {
+                for(final Pair<Float, Float> point : points) {
+
+                    final float angle = pointAngles.get(point);
+
                     canvas.save();
 
-                    canvas.translate(centerX - channelDigitWidth - twentyDP / 2f, centerY / 2f + channelDigitHeight / 2f);
+                    final float pointWidth = pointWidths.get(point);
 
-                    //draw digit one with a value derived from the system clock
-                    painter.drawDigit(canvas, (int) ((System.currentTimeMillis() / 10000) % 10));
-                    canvas.translate(channelDigitWidth + twentyDP, 0);
-                    //draw digit two with a value derived from the system clock
-                    painter.drawDigit(canvas, (int) ((System.currentTimeMillis() / 1000) % 10));
+                    canvas.translate(point.first, point.second - pointWidth / 2f);
+                    canvas.rotate(angle);
+
+//                    canvas.translate(centerX, centerY -channelDigitHeight / 2f);
+
+                    painter.setWidth(pointWidth);
+                    painter.setHeight(pointHeights.get(point));
+
+                    final int digitCount = pointCounts.get(point);
+
+                    int [] digitValues = new int[digitCount];
+                    for(int i = digitCount - 1; i >= 0; i--) {
+                        digitValues[(digitCount-1) - i] = (int) (((System.currentTimeMillis()/10) / Math.pow(10, i)) % 10);
+                    }
+
+                    painter.drawDigits(canvas, digitCount, digitValues);
+
+//                    //draw digit one with a value derived from the system clock
+//                    painter.drawDigit(canvas, (int) ((System.currentTimeMillis() / 10000) % 10));
+//                    canvas.translate(channelDigitWidth + twentyDP, 0);
+//                    //draw digit two with a value derived from the system clock
+//                    painter.drawDigit(canvas, (int) ((System.currentTimeMillis() / 1000) % 10));
                     canvas.restore();
                 }
 
