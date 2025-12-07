@@ -15,5 +15,9 @@ this.painter.setHeight(channelDigitHeight);
 painter.drawDigit(canvas, (int) ((System.currentTimeMillis() / 10000) % 10));
 ```
 
-https://github.com/user-attachments/assets/38af2013-19f5-477f-8f6e-a13fcd23bad5
+
+https://github.com/user-attachments/assets/0e3e0ff0-720d-4d76-98a6-695d9d387485
+
+
+
 
